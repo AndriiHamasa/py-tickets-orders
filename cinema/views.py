@@ -46,21 +46,23 @@ class MovieViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        queryset = self.queryset
-        title = self.request.query_params.get("title")
-        actors = self.request.query_params.get("actors")
-        genres = self.request.query_params.get("genres")
+        queryset = super().get_queryset()
 
-        if title:
-            queryset = queryset.filter(title__icontains=title)
-        if actors:
-            queryset = queryset.filter(
-                actors__id__in=self._params_to_int(actors)
-            )
-        if genres:
-            queryset = queryset.filter(
-                genres__id__in=self._params_to_int(genres)
-            )
+        if self.action == "list":
+            title = self.request.query_params.get("title")
+            actors = self.request.query_params.get("actors")
+            genres = self.request.query_params.get("genres")
+
+            if title:
+                queryset = queryset.filter(title__icontains=title)
+            if actors:
+                queryset = queryset.filter(
+                    actors__id__in=self._params_to_int(actors)
+                )
+            if genres:
+                queryset = queryset.filter(
+                    genres__id__in=self._params_to_int(genres)
+                )
 
         return queryset.distinct()
 
@@ -79,18 +81,18 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSessionSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
-
-        date = self.request.query_params.get("date")
-
-        movie_id = self.request.query_params.get("movie")
-
-        if date:
-            queryset = queryset.filter(show_time__date=date)
-        if movie_id:
-            queryset = queryset.filter(movie__id=int(movie_id))
+        queryset = super().get_queryset()
 
         if self.action == "list":
+            date = self.request.query_params.get("date")
+
+            movie_id = self.request.query_params.get("movie")
+
+            if date:
+                queryset = queryset.filter(show_time__date=date)
+            if movie_id:
+                queryset = queryset.filter(movie__id=int(movie_id))
+
             queryset = (
                 queryset.select_related("movie", "cinema_hall")
                 .annotate(
@@ -100,7 +102,7 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
                 )
             )
         else:
-            queryset.select_related("movie", "cinema_hall")
+            queryset = queryset.select_related("movie", "cinema_hall")
 
         return queryset
 
