@@ -1,8 +1,8 @@
 from django.db.models import F, Count
 from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
+from cinema.pagination import OrderPagination
 
 from cinema.serializers import (
     GenreSerializer,
@@ -46,7 +46,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = self.queryset
         title = self.request.query_params.get("title")
         actors = self.request.query_params.get("actors")
         genres = self.request.query_params.get("genres")
@@ -79,7 +79,7 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSessionSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = self.queryset
 
         date = self.request.query_params.get("date")
 
@@ -112,10 +112,6 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             return MovieSessionDetailSerializer
 
         return MovieSessionSerializer
-
-
-class OrderPagination(LimitOffsetPagination):
-    default_limit = 2
 
 
 class OrderViewSet(viewsets.ModelViewSet):
